@@ -51,7 +51,6 @@ typedef struct elasticCuckooTable_t {
   char hash_func[20];     // hash function to be used
 } elasticCuckooTable_t;
 
-
 /*
 * create_elastic allocates an elastic cuckoo hashtable
 * @d number of ways/nests
@@ -147,7 +146,7 @@ elem_t *find_elastic(elem_t *elem, elasticCuckooTable_t *hashtable);
 * @elem element to be marked invalid (if found)
 * @hashtable cuckoo hashtable to update
 */
-void delete(elem_t *elem, cuckooTable_t *hashtable);
+void delete (elem_t *elem, cuckooTable_t *hashtable);
 
 /*
 * delete_elastic marks an element invalid from the elastic cuckoo hashtable

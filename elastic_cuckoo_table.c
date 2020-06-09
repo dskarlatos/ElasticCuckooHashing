@@ -567,6 +567,9 @@ int main(int argc, char **argv) {
 
   assert(argc == 9 || argc == 5);
   d = strtol(argv[1], NULL, 10);
+  if (d < 2) {
+    printf("Number of ways required to be greater than 2\n");
+  }
   size = strtol(argv[2], NULL, 10);
   if (strcmp(argv[3], "blake2") == 0) {
     strcpy(hash_func, "blake2");
