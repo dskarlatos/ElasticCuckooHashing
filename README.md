@@ -23,13 +23,13 @@ series = {ASPLOS ’20}
 2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${type} ${scheme} ${occupancy_thr} ${scale_factor} ${swaps}
 
 Parameters:
-ways: number of ways/nests
-size: size of each way
-hash_func: string of the hash function name to be used {city,blake2}
-type: type of cuckoo hashtable {elastic, regular}
-scheme: resizing method for the elastic cuckoo hashtable {oneshot, dynamic}
-occupancy_thr: threshold to trigger resizing 
-swaps: number of elements to be rehashed
+1) ways: number of ways/nests >2
+2) size: size of each way
+3) hash_func: string of the hash function name to be used {city,blake2}
+4) type: type of cuckoo hashtable {elastic, regular}
+5) scheme: resizing method for the elastic cuckoo hashtable {oneshot, dynamic}
+6) occupancy_thr: threshold to trigger resizing 
+7) swaps: number of elements to be rehashed
 
 ## Hash functions
 
