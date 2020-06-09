@@ -20,4 +20,4 @@ series = {ASPLOS ’20}
 ## How to run
 
 1) make
-2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${regular/elastic} ${dynamic/oneshot} ${occupancy_thr} ${scale_factor} ${swaps}
+2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${type} ${scheme} ${occupancy_thr} ${scale_factor} ${swaps}
