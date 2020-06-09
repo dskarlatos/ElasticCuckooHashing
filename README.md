@@ -16,3 +16,8 @@ series = {ASPLOS ’20}
 ```
 
 [You can find the Elastic Cuckoo Page Tablers paper here!](http://skarlat2.web.engr.illinois.edu)
+
+## How to run
+
+1) make
+2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${regular/elastic} ${dynamic/oneshot} ${occupancy_thr} ${scale_factor} ${swaps}
