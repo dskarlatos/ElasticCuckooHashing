@@ -35,3 +35,6 @@ Parameters:
 
 1) Blake2 from https://github.com/BLAKE2/BLAKE2
 2) CityHash from https://github.com/google/cityhash
+
+## Notes
+The purpose of this code is to demonstrate some of the characteristics of (elastic) cuckoo hashing and it has not been optimized for performance.
