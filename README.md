@@ -15,7 +15,7 @@ series = {ASPLOS ’20}
 }
 ```
 
-[You can find the Elastic Cuckoo Page Tables paper here!](http://skarlat2.web.engr.illinois.edu)
+[You can find the Elastic Cuckoo Page Tables paper here!](http://skarlat2.web.engr.illinois.edu/publications/cuckoo_asplos20.pdf)
 
 ## How to run
 
