@@ -14,17 +14,7 @@
 #define MAX_RETRIES 64
 #define EXTEND 1.25
 
-uint64_t hash_size(uint64_t size) {
-  uint64_t hash_size = 0;
-
-  while (log2(size) > (float)hash_size) {
-    hash_size += 8;
-  }
-#ifdef DEBUG
-  printf("hashtable size = %lu, requested size = %lu\n", hash_size, size);
-#endif
-  return hash_size;
-}
+uint64_t hash_size(uint64_t size);
 
 void create(uint32_t d, uint64_t size, cuckooTable_t *hashtable,
             char *hash_func) {
@@ -79,7 +69,7 @@ void create(uint32_t d, uint64_t size, cuckooTable_t *hashtable,
 
 void create_elastic(uint32_t d, uint64_t size, elasticCuckooTable_t *hashtable,
                     char *hash_func, float rehash_threshold, uint32_t scale,
-                    uint32_t swaps) {
+                    uint32_t swaps, uint8_t priority) {
   hashtable->current = (cuckooTable_t *)malloc(sizeof(cuckooTable_t));
   hashtable->migrate = NULL;
   hashtable->rehash_threshold = rehash_threshold;
@@ -92,6 +82,7 @@ void create_elastic(uint32_t d, uint64_t size, elasticCuckooTable_t *hashtable,
     hashtable->scale = scale;
   }
   hashtable->swaps = swaps;
+  hashtable->priority = priority;
   hashtable->rehash_probes = 0;
   hashtable->rehash_elems = 0;
   strcpy(hashtable->hash_func, hash_func);
@@ -118,7 +109,13 @@ uint64_t rehash(elasticCuckooTable_t *hashtable, uint64_t swaps) {
         current->hashtable[nest][current->rehashed[nest]].valid = 0;
         current->rehashed[nest]++;
         current->num_elems[nest]--;
-        retries += insert_elastic(&move, hashtable);
+        if (hashtable->priority) {
+          // this will end up trying first the new hashtable
+          retries += insert_elastic(&move, hashtable, 1, nest);
+        } else {
+          // perform a random walk
+          retries += insert_elastic(&move, hashtable, 0, 0);
+        }
         hashtable->rehash_probes += retries;
         hashtable->rehash_elems++;
       } else {
@@ -294,15 +291,20 @@ uint32_t insert(elem_t *elem, cuckooTable_t *hashtable) {
   return tries + 1;
 }
 
-uint32_t insert_elastic(elem_t *elem, elasticCuckooTable_t *hashtable) {
+uint32_t insert_elastic(elem_t *elem, elasticCuckooTable_t *hashtable,
+                        uint8_t bias, uint16_t bias_nest) {
   uint32_t tries = 0, current_inserts = 0, migrate_inserts = 0;
   uint16_t nest = 0, new_nest = 0;
   uint64_t hash = 0;
   elem_t old;
   cuckooTable_t *selectTable;
 
-  _rdrand16_step(&nest);
-  nest = nest % hashtable->current->d;
+  if (bias) {
+    nest = bias_nest;
+  } else {
+    _rdrand16_step(&nest);
+    nest = nest % hashtable->current->d;
+  }
 
   // try to insert until MAX_RETRIES insertion attempts
   for (tries = 0; tries < MAX_RETRIES; tries++) {
@@ -505,9 +507,21 @@ void printTable(cuckooTable_t *hashtable) {
   }
 }
 
+uint64_t hash_size(uint64_t size) {
+  uint64_t hash_size = 0;
+
+  while (log2(size) > (float)hash_size) {
+    hash_size += 8;
+  }
+#ifdef DEBUG
+  printf("hashtable size = %lu, requested size = %lu\n", hash_size, size);
+#endif
+  return hash_size;
+}
+
 void simple_example(uint32_t d, uint64_t size, char *hash_func, uint8 elastic,
                     uint8_t oneshot, float rehash_threshold, uint8_t scale,
-                    uint8_t swaps) {
+                    uint8_t swaps, uint8_t priority) {
   uint32_t i = 0, N = 512;
   uint64_t *test_values = NULL;
   elem_t new_elem;
@@ -516,7 +530,7 @@ void simple_example(uint32_t d, uint64_t size, char *hash_func, uint8 elastic,
 
   if (elastic) {
     create_elastic(d, size, &elasticCuckooHT, hash_func, rehash_threshold,
-                   scale, swaps);
+                   scale, swaps, priority);
   } else {
     create(d, size, &cuckooHT, hash_func);
   }
@@ -543,7 +557,7 @@ void simple_example(uint32_t d, uint64_t size, char *hash_func, uint8 elastic,
     test_values[i] = new_elem.value;
 
     if (elastic) {
-      insert_elastic(&new_elem, &elasticCuckooHT);
+      insert_elastic(&new_elem, &elasticCuckooHT, 0, 0);
     } else {
       insert(&new_elem, &cuckooHT);
     }
@@ -564,8 +578,9 @@ int main(int argc, char **argv) {
   uint32_t d = 4, size = 0, elastic = 0, oneshot = 0, scale = 0, swaps = 0;
   char hash_func[20];
   float threshold = 0;
+  uint8_t priority = 0;
 
-  assert(argc == 9 || argc == 5);
+  assert(argc == 10 || argc == 5);
   d = strtol(argv[1], NULL, 10);
   if (d < 2) {
     printf("Number of ways required to be greater than 2\n");
@@ -595,9 +610,11 @@ int main(int argc, char **argv) {
     threshold = strtof(argv[6], NULL);
     scale = strtol(argv[7], NULL, 10);
     swaps = strtol(argv[8], NULL, 10);
+    priority = strtol(argv[9], NULL, 10);
   }
 
-  simple_example(d, size, hash_func, elastic, oneshot, threshold, scale, swaps);
+  simple_example(d, size, hash_func, elastic, oneshot, threshold, scale, swaps,
+                 priority);
 
   return 0;
 }

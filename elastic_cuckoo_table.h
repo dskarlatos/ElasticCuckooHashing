@@ -46,6 +46,7 @@ typedef struct elasticCuckooTable_t {
   uint64_t curr_size;     // size per d hashtable of current
   uint32_t scale;         // scaling factor
   uint32_t swaps;         // number of swaps
+  uint8_t priority;       // priority of table during rehashing
   uint64_t rehash_probes; // number of rehash probes
   uint64_t rehash_elems;  // number of rehash elements
   char hash_func[20];     // hash function to be used
@@ -69,10 +70,11 @@ void create(uint32_t d, uint64_t size, cuckooTable_t *hashtable,
 * @rehash_treshold resizing threshold as a fraction
 * @scale scaling factor during resizing
 * @swaps number of swaps during rehashing
+* @priority bias the rehashing inserts vs random
 */
 void create_elastic(uint32_t d, uint64_t size, elasticCuckooTable_t *hashtable,
                     char *hash_func, float rehash_threshold, uint32_t scale,
-                    uint32_t swaps);
+                    uint32_t swaps, uint8_t priority);
 
 /*
 * rehash rehash elements in th elastic cuckoo hashtable
@@ -124,8 +126,11 @@ uint32_t insert(elem_t *elem, cuckooTable_t *hashtable);
 * insert_elastic try to insert an element in the elastic cuckoo hashtable
 * @elem element to insert
 * @hashtable elasticCuckoo hashtable to be updated
+* @bias enable to selected the bias_nest
+* @bias_nest when bias is enabled select @bias_nest as the first try
 */
-uint32_t insert_elastic(elem_t *elem, elasticCuckooTable_t *hashtable);
+uint32_t insert_elastic(elem_t *elem, elasticCuckooTable_t *hashtable,
+                        uint8_t bias, uint16_t bias_nest);
 
 /*
 * find find an element in the cuckoo hashtable
