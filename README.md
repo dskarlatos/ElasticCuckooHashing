@@ -20,7 +20,7 @@ series = {ASPLOS ’20}
 ## How to run
 
 1) make
-2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${type} ${scheme} ${occupancy_thr} ${scale_factor} ${swaps}
+2) ./elastic_cuckoo ${#ways} ${size} ${hash_func} ${type} ${scheme} ${occupancy_thr} ${scale_factor} ${swaps} ${priority}
 
 Parameters:
 1) ways: number of ways/nests >2
@@ -30,6 +30,7 @@ Parameters:
 5) scheme: resizing method for the elastic cuckoo hashtable {oneshot, dynamic}
 6) occupancy_thr: threshold to trigger resizing 
 7) swaps: number of elements to be rehashed
+8) priority: bias a hashtable during insertion
 
 ## Hash functions
 
